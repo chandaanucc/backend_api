@@ -29,7 +29,7 @@ namespace Shareplus.Controllers
                     return BadRequest("Upload a valid PDF file.");
 
                 if (pdfUploadDto.File.Length > MaxFileSize)
-                    return BadRequest($"File size must be less than {MaxFileSize / (1024 * 1024)} MB.");
+                    return BadRequest($"File size must be less than {MaxFileSize / (1024 * 1024)} MB."); //filesize condition
 
                 using var memoryStream = new MemoryStream();
                 await pdfUploadDto.File.CopyToAsync(memoryStream);

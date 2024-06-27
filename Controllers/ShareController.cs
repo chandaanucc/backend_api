@@ -20,9 +20,9 @@ namespace Shareplus.Controllers
         }
 
         [HttpGet("all")]
-        public async Task<IActionResult> GetAllAssociates()
+        public async Task<IActionResult> GetAllAssociates() 
         {
-            var associates = await _context.Associates.ToListAsync();
+            var associates = await _context.Associates.ToListAsync(); //get all associates
             return Ok(associates);
         }
 
