@@ -21,7 +21,7 @@ builder.Services.Configure<FormOptions>(options =>
 
 builder.Services.AddCors(options =>
 {
-    options.AddPolicy("Flutter",
+    options.AddPolicy("Allow All",
         builder => builder
             .AllowAnyMethod()
             .AllowAnyHeader()
@@ -47,7 +47,7 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
-app.UseCors("Flutter");
+app.UseCors("Allow All");
 app.Use(async (context, next) =>
 {
     Console.WriteLine("CORS headers:");
