@@ -32,10 +32,8 @@ builder.Services.AddCors(options =>
 });
 
     
-
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
-
 
 var app = builder.Build();
 
@@ -50,12 +48,14 @@ app.UseHttpsRedirection();
 app.UseCors("Allow All");
 app.Use(async (context, next) =>
 {
+    await next();
     Console.WriteLine("CORS headers:");
+    Console.WriteLine($"Status Code: {context.Response.StatusCode}");
     foreach (var header in context.Response.Headers)
     {
         Console.WriteLine($"{header.Key}: {header.Value}");
     }
-    await next();
+    
 });
 app.UseAuthentication();
 app.UseAuthorization();

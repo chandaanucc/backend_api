@@ -21,42 +21,30 @@ namespace Shareplus.Controllers
             _context = context;
         }
 
-        // [HttpGet("view/{id}")]
-        // public async Task<IActionResult> ViewPdf(int id)
-        // {
-        //     try
-        //     {
-        //         var pdfFile = await _context.FileUploads.FindAsync(id);
-        //         if (pdfFile == null)
-        //             return NotFound();
-
-        //         return File(pdfFile.Data, "application/pdf");
-        //     }
-        //     catch (Exception ex)
-        //     {
-        //         // Log the exception or handle it as needed
-        //         return StatusCode(StatusCodes.Status500InternalServerError, $"An error occurred: {ex.Message}");
-        //     }
-        // }
         [HttpGet("view/latest")]
         public async Task<IActionResult> ViewLatestPdf( String username)
         {
-            
-            var associate = await _context.Associates.FirstOrDefaultAsync(a => a.Username == username);
+            PDFile pdfFile = null; // Declare pdfFile outside if-else blocks
 
-            if (associate == null || !associate.IsAuthorized)
+            // Check if the user is an admin
+            var admin = await _context.Admins.FirstOrDefaultAsync(a => a.Username == username);
+            if (admin != null && admin.IsAuthorized)
             {
-                return Unauthorized("You do not have access to view this file.");
+                pdfFile = await _context.FileUploads.OrderByDescending(p => p.Id).FirstOrDefaultAsync();
             }
-
-            var pdfFile = await _context.FileUploads
-                .OrderByDescending(p => p.Id)
-                .FirstOrDefaultAsync();
+            else
+            {
+                // Check if the user is an authorized associate
+                var associate = await _context.Associates.FirstOrDefaultAsync(a => a.Username == username);
+                if (associate != null && associate.IsAuthorized)
+                {
+                    pdfFile = await _context.FileUploads.OrderByDescending(p => p.Id).FirstOrDefaultAsync();
+                }
+            }
 
             if (pdfFile == null)
                 return NotFound();
 
-            //ILogger.LogInformation("Successfully viewed the latest file with ID {FileId}", pdfFile.Id); // Log custom message
             return File(pdfFile.Data, "application/pdf", pdfFile.FileName);
         }
     }

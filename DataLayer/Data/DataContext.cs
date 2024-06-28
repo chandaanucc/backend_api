@@ -19,7 +19,7 @@ namespace Shareplus.DataLayer.Data
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.Entity<PDFile>().ToTable("FileUploads");
-
+            modelBuilder.Entity<Admin>().Property(a => a.IsAuthorized).HasDefaultValue(true);
             
 
             base.OnModelCreating(modelBuilder);

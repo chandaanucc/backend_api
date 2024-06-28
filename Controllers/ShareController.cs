@@ -26,6 +26,20 @@ namespace Shareplus.Controllers
             return Ok(associates);
         }
 
+        [HttpPost("enable-access")]
+        public async Task<IActionResult> EnableAccess([FromBody] List<int> associateIds)
+        {
+            var associates = await _context.Associates.Where(a => associateIds.Contains(a.Id)).ToListAsync();
+
+            foreach (var associate in associates)
+            {
+                associate.IsAuthorized = true;
+            }
+
+            await _context.SaveChangesAsync();
+            return Ok("Access enabled for selected associates.");
+        }
+
         
     }
 }
