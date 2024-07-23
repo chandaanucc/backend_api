@@ -40,6 +40,31 @@ namespace Shareplus.Controllers
             return Ok("Access enabled for selected associates.");
         }
 
+        [HttpPost("disable-access")]
+        public async Task<IActionResult> DisableAccess([FromBody] List<int> associateIds)
+        {
+           
+            var associates = await _context.Associates
+                .Where(a => associateIds.Contains(a.Id) && a.IsAuthorized)  // only fetch those with access enabled
+                .ToListAsync();
+
+            if (associates.Count == 0)
+            {
+                return NotFound("No authorized associates found with the provided IDs.");
+            }
+
+            
+            foreach (var associate in associates)
+            {
+                associate.IsAuthorized = false;
+            }
+
+        
+            await _context.SaveChangesAsync();
+            return Ok("Access disabled for selected associates.");
+        }
+
+
         
     }
 }

@@ -22,8 +22,12 @@ namespace Shareplus.Controllers
         }
 
         [HttpGet("view/latest")]
-        public async Task<IActionResult> ViewLatestPdf( String username)
+        public async Task<IActionResult> ViewLatestPdf([FromQuery] String username)
         {
+            if (string.IsNullOrEmpty(username))
+                {
+                    return BadRequest("Username is required.");
+                }
             PDFile pdfFile = null; // Declare pdfFile outside if-else blocks
 
             // Check if the user is an admin
