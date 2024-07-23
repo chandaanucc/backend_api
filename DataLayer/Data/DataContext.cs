@@ -14,6 +14,7 @@ namespace Shareplus.DataLayer.Data
         public DbSet<Admin> Admins { get; set; } 
         public DbSet<Associate> Associates { get; set; } 
         public DbSet<PDFile> FileUploads { get; set; }
+        public DbSet<Client> Clients { get; set; }
          
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
