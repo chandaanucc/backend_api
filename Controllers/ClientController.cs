@@ -17,7 +17,7 @@ namespace Shareplus.Controllers
             _context = context;
         }
 
-        [HttpPost]
+        [HttpPost("add-client")]
         public async Task<ActionResult<Client>> PostClient(ClientDTO clientDto)
         {
             if (clientDto == null)
@@ -38,7 +38,7 @@ namespace Shareplus.Controllers
 
             return CreatedAtAction(nameof(GetClient), new { id = client.Id }, client);
         }
-        [HttpGet]
+        [HttpGet("get-clients")]
         public async Task<ActionResult<IEnumerable<ClientDTO>>> GetClients()
         {
             var clients = await _context.Clients.ToListAsync();
@@ -54,7 +54,34 @@ namespace Shareplus.Controllers
             return Ok(clientDtos);
         }
 
-        
+        [HttpGet("region/{region}")]
+        public async Task<ActionResult<IEnumerable<ClientDTO>>> GetClientsByRegion(string region)
+        {
+            if (string.IsNullOrWhiteSpace(region))
+            {
+                return BadRequest("Region parameter is required.");
+            }
+
+            var clients = await _context.Clients
+                                        .Where(c => c.Region.ToLower() == region.ToLower())
+                                        .Select(c => new ClientDTO
+                                        {
+                                            Id = c.Id,
+                                            ClientName = c.Name,
+                                            Mail = c.Mail,
+                                            Phone = c.Phone,
+                                            Region = c.Region
+                                        })
+                                        .ToListAsync();
+
+            if (clients == null || clients.Count == 0)
+            {
+                return NotFound($"No clients found in region: {region}");
+            }
+
+            return Ok(clients);
+        }
+    
         [HttpGet("{id}")]
         public async Task<ActionResult<Client>> GetClient(int id)
         {

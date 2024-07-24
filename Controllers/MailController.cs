@@ -26,14 +26,24 @@ namespace Shareplus.Controllers
             _context = context;
         }
 
-        // POST: api/Clients/SendPdf
+        
         [HttpPost("SendPdf")]
         public async Task<IActionResult> SendPdf([FromBody] SendPdfRequest request)
         {
-            if (request == null || request.ClientIds == null || !request.ClientIds.Any() || request.PdfId <= 0)
+            if (request == null || request.ClientIds == null || !request.ClientIds.Any())
                 return BadRequest("Invalid request data.");
 
-            var pdf = await _context.FileUploads.FindAsync(request.PdfId);
+            
+            var latestPdf = await _context.FileUploads
+                                        .OrderByDescending(f => f.Id)
+                                        .FirstOrDefaultAsync();
+
+            if (latestPdf == null)
+                return NotFound("No PDF files found.");
+
+            var pdfId = latestPdf.Id; 
+
+            var pdf = await _context.FileUploads.FindAsync(pdfId);
 
             if (pdf == null)
                 return NotFound("PDF file not found.");
@@ -52,7 +62,7 @@ namespace Shareplus.Controllers
 
             foreach (var email in emailAddresses)
             {
-                message.To.Add(new MailboxAddress("",email));
+                message.To.Add(new MailboxAddress("", email));
             }
 
             message.Subject = "Share Plus Document";
@@ -60,13 +70,15 @@ namespace Shareplus.Controllers
             var builder = new BodyBuilder
             {
                 TextBody = "Please find the attached PDF document.",
-                Attachments = { new MimePart("application", "pdf")
-                {
-                    Content = new MimeContent(new MemoryStream(pdf.Data)),
-                    ContentDisposition = new ContentDisposition(ContentDisposition.Attachment),
-                    ContentTransferEncoding = ContentEncoding.Base64,
-                    FileName = pdf.FileName
-                }}
+                Attachments = {
+                    new MimePart("application", "pdf")
+                    {
+                        Content = new MimeContent(new MemoryStream(pdf.Data)),
+                        ContentDisposition = new ContentDisposition(ContentDisposition.Attachment),
+                        ContentTransferEncoding = ContentEncoding.Base64,
+                        FileName = pdf.FileName
+                    }
+                }
             };
 
             message.Body = builder.ToMessageBody();
