@@ -26,6 +26,7 @@ namespace Shareplus.Controllers
         public IActionResult Login([FromBody] User login)
         {
             _logger.LogInformation("Login attempt for user: {Username}", login.Username);
+            Console.WriteLine($"Login attempt for user: {login.Username}");
 
             // Check if the user is an admin
             var admin = _context.Admins.FirstOrDefault(u => u.Username == login.Username && u.Password == login.Password);
@@ -36,14 +37,19 @@ namespace Shareplus.Controllers
             }
 
             // Check if the user is an associate
-            var associate = _context.Associates.FirstOrDefault(u => u.Username == login.Username && u.Password == login.Password);
+            var associate = _context.Associates
+                            .Where(u => u.Username == login.Username && u.Password == login.Password)
+                            .Select(u => new { u.Username, u.Region })
+                            .FirstOrDefault();
+
             if (associate != null)
             {
                 _logger.LogInformation("Associate login successful for user: {Username}", login.Username);
-                return Ok(new { Role = "Associate", Message = "Login Successful, Now you can see AssociateHomeScreen" });
+                return Ok(new { Role = "Associate", Message = "Login Successful, Now you can see AssociateHomeScreen", Region = associate.Region });
             }
 
             _logger.LogWarning("Login failed for user: {Username}", login.Username);
+            Console.WriteLine($"Login failed for user: {login.Username}");
             return Unauthorized();
         }
 
@@ -74,7 +80,7 @@ namespace Shareplus.Controllers
         public IActionResult RegisterAdmin([FromBody] Admin admin)
         {
             _logger.LogInformation("Register admin attempt for user: {Username}", admin.Username);
-
+            Console.WriteLine("Register admin attempt for user: {Username}", admin.Username);
             // Check if the admin already exists
             var existingAdmin = _context.Admins.FirstOrDefault(a => a.Username == admin.Username);
             if (existingAdmin != null)
@@ -88,6 +94,7 @@ namespace Shareplus.Controllers
             _context.SaveChanges();
 
             _logger.LogInformation("Admin registered successfully: {Username}", admin.Username);
+            Console.WriteLine("Admin registered successfully: {Username}", admin.Username);
             return Ok("Admin registered successfully");
         }
 
@@ -96,12 +103,13 @@ namespace Shareplus.Controllers
         public IActionResult AddAssociate([FromBody] Associate associate)
         {
             _logger.LogInformation("Add associate attempt for user: {Username}", associate.Username);
-
+            Console.WriteLine("Add associate attempt for user: {Username}", associate.Username);
             // Add the associate to the database
             _context.Associates.Add(associate);
             _context.SaveChanges();
 
             _logger.LogInformation("Associate added successfully: {Username}", associate.Username);
+            Console.WriteLine("Associate added successfully: {Username}", associate.Username);
             return Ok("Associate added successfully");
         }
     }

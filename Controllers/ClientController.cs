@@ -54,13 +54,9 @@ namespace Shareplus.Controllers
             return Ok(clientDtos);
         }
 
-        [HttpGet("region/{region}")]
-        public async Task<ActionResult<IEnumerable<ClientDTO>>> GetClientsByRegion(string region)
+        [HttpGet("region")]
+        public async Task<ActionResult<IEnumerable<ClientDTO>>> GetClientsByRegion([FromQuery]string region)
         {
-            if (string.IsNullOrWhiteSpace(region))
-            {
-                return BadRequest("Region parameter is required.");
-            }
 
             var clients = await _context.Clients
                                         .Where(c => c.Region.ToLower() == region.ToLower())
